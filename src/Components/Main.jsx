@@ -16,7 +16,7 @@ export default function Main() {
 
   return (
     <div className='flex flex-col justify-center items-center'>
-        <h1 className='text-5xl bg-black w-full text-center  md:h-24 pt-4 text-orange-400 font-sans font-bold'>Essay Checker.ai Quiz Assessment</h1>
+        <h1 className='text-5xl bg-black w-full text-center  md:h-24 pt-4 text-orange-400 font-sans font-bold'>EssayChecker.ai Quiz Assessment</h1>
 
         <ol className='w-full text-center pt-10'>
             <li className='text-2xl pt-4 font-semibold'>You will be asked 10 Questions </li>

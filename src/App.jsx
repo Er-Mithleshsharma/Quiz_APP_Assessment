@@ -4,6 +4,7 @@ import Quiz from './Components/Quiz'
 import Result from './Components/Result'
 import { Provider } from 'react-redux'
 import appstore from './utils/appstore'
+
 const router = createBrowserRouter([
   {
     path : '/',
