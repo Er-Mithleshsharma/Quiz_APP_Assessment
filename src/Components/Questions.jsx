@@ -12,6 +12,7 @@ const Questions = ({ quizData }) => {
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
+  const [showResultButton, setShowResultButton] = useState(false);
   const [submittedQuestions, setSubmittedQuestions] = useState(new Array(quizData.length).fill(false));
 
   const handleRadioChange = (optionKey, ans) => {
@@ -32,6 +33,10 @@ const Questions = ({ quizData }) => {
   const handleNextQuestion = () => {
     if (currentQuestionIndex < quizData.length - 1) {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+    } 
+    if(currentQuestionIndex == quizData.length-2)
+    {
+      setShowResultButton(true)
     }
   };
 
@@ -63,12 +68,16 @@ const Questions = ({ quizData }) => {
       transition: Bounce,
       });
   const handleSubmit = () => {
+    if(!selectedAnswers[currentQuestionIndex])
+    {
+      return;
+    }
     if (!submittedQuestions[currentQuestionIndex]) {
       setSubmittedQuestions((prevSubmittedQuestions) => {
         const updatedSubmittedQuestions = [...prevSubmittedQuestions];
         updatedSubmittedQuestions[currentQuestionIndex] = true;
          console.log(selectedAnswers[currentQuestionIndex])
-        if(  selectedAnswers[currentQuestionIndex].optionKey == selectedAnswers[currentQuestionIndex].ans){
+        if( selectedAnswers[currentQuestionIndex].optionKey == selectedAnswers[currentQuestionIndex].ans){
           
          notify()
         }
@@ -144,10 +153,10 @@ const Questions = ({ quizData }) => {
         
         </div>
 
-        <div className="mt-14 text-right">
-          <button className="px-6 py-2 bg-orange-400 rounded-lg" onClick={saveResults}>
-            Get Results
-          </button>
+        < div className="mt-14 text-right">
+        { showResultButton && < button className="px-6 py-2 bg-orange-400 rounded-lg" onClick={saveResults}>
+          Get Results
+        </button>}
         </div>
       </div>
     </div>
