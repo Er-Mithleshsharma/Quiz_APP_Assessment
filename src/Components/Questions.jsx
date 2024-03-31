@@ -14,8 +14,10 @@ const Questions = ({ quizData }) => {
   const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [showResultButton, setShowResultButton] = useState(false);
   const [submittedQuestions, setSubmittedQuestions] = useState(new Array(quizData.length).fill(false));
+  const [enableNextButton, setEnableNextButton] = useState(false); // State to enable/disable Next button
+  const [submitButtonClicked, setSubmitButtonClicked] = useState(false); // State to track if submit button is clicked
 
-  const handleRadioChange = (optionKey, ans) => {
+  const handleAnswerSelection = (optionKey, ans) => {
     if (!submittedQuestions[currentQuestionIndex]) {
       setSelectedAnswers((prevSelectedAnswers) => {
         const updatedAnswers = [...prevSelectedAnswers];
@@ -25,68 +27,52 @@ const Questions = ({ quizData }) => {
     }
   };
 
-  const getSelectedAnswer = () => {
-    const selectedAnswer = selectedAnswers[currentQuestionIndex];
-    return selectedAnswer ? selectedAnswer.optionKey : '';
-  };
-
   const handleNextQuestion = () => {
     if (currentQuestionIndex < quizData.length - 1) {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+      setEnableNextButton(false); // Disable the "Next" button after moving to the next question
+      setSubmitButtonClicked(false); // Reset the submit button clicked state for the next question
     } 
-    if(currentQuestionIndex == quizData.length-2)
-    {
-      setShowResultButton(true)
+    if(currentQuestionIndex === quizData.length - 2) {
+      setShowResultButton(true);
     }
   };
 
   const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prevIndex) => prevIndex - 1);
+    if (currentQuestionIndex < quizData.length - 1) {
+      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+      setEnableNextButton(false); // Disable the "Next" button after moving to the next question
+      setSubmitButtonClicked(false); // Reset the submit button clicked state for the next question
+    }
+    if(currentQuestionIndex === quizData.length - 2) {
+      setShowResultButton(true);
     }
   };
-  const notify = () => toast.success('Correct Answer', {
-    position: "top-right",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-    transition: Bounce,
-    });
-    const notify1 = ()=> toast.error('Wrong Answer', {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-      transition: Bounce,
-      });
+
   const handleSubmit = () => {
-    if(!selectedAnswers[currentQuestionIndex])
-    {
+    if (!selectedAnswers[currentQuestionIndex] || submittedQuestions[currentQuestionIndex] || submitButtonClicked) {
       return;
     }
-    if (!submittedQuestions[currentQuestionIndex]) {
-      setSubmittedQuestions((prevSubmittedQuestions) => {
-        const updatedSubmittedQuestions = [...prevSubmittedQuestions];
-        updatedSubmittedQuestions[currentQuestionIndex] = true;
-         console.log(selectedAnswers[currentQuestionIndex])
-        if( selectedAnswers[currentQuestionIndex].optionKey == selectedAnswers[currentQuestionIndex].ans){
-          
-         notify()
-        }
-        else 
-        notify1()
-    
-        return updatedSubmittedQuestions;
+    setSubmittedQuestions((prevSubmittedQuestions) => {
+      const updatedSubmittedQuestions = [...prevSubmittedQuestions];
+      updatedSubmittedQuestions[currentQuestionIndex] = true;
+      setEnableNextButton(true); // Enable the "Next" button after submitting the answer
+      setSubmitButtonClicked(true); // Set the submit button as clicked
+      const isCorrect = selectedAnswers[currentQuestionIndex].optionKey === selectedAnswers[currentQuestionIndex].ans;
+      const feedbackMessage = isCorrect ? 'Correct Answer' : 'Wrong Answer';
+      toast[isCorrect ? 'success' : 'error'](feedbackMessage, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: isCorrect ? "colored" : "light",
+        transition: Bounce,
       });
-    }
+      return updatedSubmittedQuestions;
+    });
   };
 
   const saveResults = () => {
@@ -98,81 +84,72 @@ const Questions = ({ quizData }) => {
 
   return (
     <>
-    <div className="flex justify-center items-center bg-black h-screen md:h-auto">
-      <div className="max-w-4xl w-full p-8 bg-white rounded-lg shadow-lg h-full md:h-auto">
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-2 shadow-sm pb-2">{`Q${currentQuestionIndex + 1} ${currentQuestion.q} : `}</h2>
-          <p className="text-gray-700 mb-4 font-semibold text-xl ">{currentQuestion.word}</p>
-          <ul>
-            {Object.keys(currentQuestion.options).map((optionKey) => {
-              const option = currentQuestion.options[optionKey];
-              const ans = currentQuestion.ans;
-              return (
-                <li key={optionKey} className="mb-2 flex-1">
-                  <label className="inline-flex items-center bg-gray-100 w-full p-2 rounded-lg text-lg">
-                    <input 
-                      type="radio"
-                      name={`question_${currentQuestionIndex}`}
-                      value={optionKey}
-                      checked={getSelectedAnswer() === optionKey}
-                      onChange={() => handleRadioChange(optionKey, ans)}
-                      className="form-radio h-4 w-4 text-indigo-600"
-                      disabled={submittedQuestions[currentQuestionIndex]}
-                    />
-                    <span className="ml-2 text-gray-700">{option.word}</span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
+      <div className="flex justify-center items-center bg-black h-screen md:h-auto">
+        <div className="max-w-4xl w-full p-8 bg-white rounded-lg shadow-lg h-full md:h-auto">
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold mb-2 shadow-sm pb-2">{`Q${currentQuestionIndex + 1} ${currentQuestion.q} : `}</h2>
+            <p className="text-gray-700 mb-4 font-semibold text-xl ">{currentQuestion.word}</p>
+            <ul>
+              {Object.keys(currentQuestion.options).map((optionKey) => {
+                const option = currentQuestion.options[optionKey];
+                const ans = currentQuestion.ans;
+                const isSelected = selectedAnswers[currentQuestionIndex]?.optionKey === optionKey;
+                return (
+                  <li key={optionKey} className="mb-2 flex-1" onClick={() => handleAnswerSelection(optionKey, ans)}>
+                    <div className={`inline-flex items-center bg-gray-100 w-full p-2 rounded-lg text-lg cursor-pointer ${isSelected ? 'bg-gray-300' : ''}`}>
+                      <span className={`text-indigo-600 mr-2 ${isSelected ? 'text-gray-900' : ''}`}>{optionKey}</span>
+                      <span>{option.word}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
-        </div>
+          <div className="flex justify-between">
+            <button
+              className="px-6 py-2 bg-orange-400 rounded-lg"
+              onClick={handlePreviousQuestion}
+              disabled={currentQuestionIndex === -1}
+            >
+              Skip
+            </button>
+            <button
+              className={`px-6 py-2 bg-orange-400 rounded-lg ${submitButtonClicked ? 'bg-gray-400' : ''}`}
+              onClick={handleSubmit}
+              disabled={submittedQuestions[currentQuestionIndex] || submitButtonClicked}
+            >
+              Submit
+            </button> 
+            <button
+              className={`px-6 py-2 bg-orange-400 rounded-lg ${enableNextButton ? '' : 'bg-gray-400'}`}
+              onClick={handleNextQuestion}
+              disabled={!enableNextButton}
+            >
+              Next
+            </button>
+          </div>
 
-        <div className="flex justify-between">
-          <button 
-            className="px-6 py-2 bg-orange-400 rounded-lg" 
-            onClick={handlePreviousQuestion}
-            disabled={currentQuestionIndex === 0}
-          >
-            Previous
-          </button> 
-           <button 
-            className="px-6 py-2 bg-orange-400 rounded-lg" 
-            onClick={handleSubmit}
-            disabled={submittedQuestions[currentQuestionIndex]}
-          >
-            Submit
-          </button>
-          <button 
-            className="px-6 py-2 bg-orange-400 rounded-lg" 
-            onClick={handleNextQuestion}
-            disabled={currentQuestionIndex === quizData.length - 1}
-          >
-            Next
-          </button>
-        
-        </div>
-
-        < div className="mt-14 text-right">
-        { showResultButton && < button className="px-6 py-2 bg-orange-400 rounded-lg" onClick={saveResults}>
-          Get Results
-        </button>}
+          <div className="mt-14 text-right">
+            {showResultButton && <button className="px-6 py-2 bg-orange-400 rounded-lg" onClick={saveResults}>
+              Get Results
+            </button>}
+          </div>
         </div>
       </div>
-    </div>
-    <ToastContainer
-position="top-right"
-autoClose={5000}
-hideProgressBar={false}
-newestOnTop={false}
-closeOnClick
-rtl={false}
-pauseOnFocusLoss
-draggable
-pauseOnHover
-theme="colored"
-transition={Bounce}
-/>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Bounce}
+      />
     </>
   );
 };
