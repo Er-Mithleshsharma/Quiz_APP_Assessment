@@ -33,7 +33,7 @@ const Questions = ({ quizData }) => {
       setEnableNextButton(false); // Disable the "Next" button after moving to the next question
       setSubmitButtonClicked(false); // Reset the submit button clicked state for the next question
     } 
-    if(currentQuestionIndex === quizData.length - 2) {
+    if(currentQuestionIndex === quizData.length - 1) {
       setShowResultButton(true);
     }
   };
@@ -44,7 +44,7 @@ const Questions = ({ quizData }) => {
       setEnableNextButton(false); // Disable the "Next" button after moving to the next question
       setSubmitButtonClicked(false); // Reset the submit button clicked state for the next question
     }
-    if(currentQuestionIndex === quizData.length - 2) {
+    if(currentQuestionIndex === quizData.length - 1) {
       setShowResultButton(true);
     }
   };
@@ -115,14 +115,14 @@ const Questions = ({ quizData }) => {
               Skip
             </button>
             <button
-              className={`px-6 py-2 bg-orange-400 rounded-lg ${submitButtonClicked ? 'bg-gray-400' : ''}`}
+              className={`px-6 py-2  rounded-lg ${submitButtonClicked ? 'bg-gray-400' : 'bg-orange-400'}`}
               onClick={handleSubmit}
               disabled={submittedQuestions[currentQuestionIndex] || submitButtonClicked}
             >
               Submit
             </button> 
             <button
-              className={`px-6 py-2 bg-orange-400 rounded-lg ${enableNextButton ? '' : 'bg-gray-400'}`}
+              className={`px-6 py-2 rounded-lg ${enableNextButton ? ' bg-orange-400' : 'bg-gray-400'}`}
               onClick={handleNextQuestion}
               disabled={!enableNextButton}
             >
